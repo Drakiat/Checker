@@ -48,21 +48,12 @@ def check_port_22(ip):
     if result == 0:
         return ip
     return None
-
-def scan_ips(ip_list):
-    open_ips = []
-    with ThreadPoolExecutor(max_workers=254) as executor:
-        results = executor.map(check_port_22, ip_list)
-        for result in results:
-            if result:
-                open_ips.append(result)
-    return open_ips
 #Function to read from file if it exists
 def read_ssh_ips():
     file_path = "ssh_ips.txt"
     if os.path.isfile(file_path):
-        answer = input("File ssh_ips.txt found! Do you want to import IPs from ssh_ips.txt? (y/n) ").lower()
-        if answer == "y":
+        #answer = input("File ssh_ips.txt found! Do you want to import IPs from ssh_ips.txt? (y/n) ").lower()
+        if True:
             pass
         else:
             os.remove(file_path)
@@ -73,28 +64,8 @@ def read_ssh_ips():
     else:
         print(f"File {file_path} does not exist")
         return []
-#Function to scan by pinging hosts on the network
-def pingSweep():
-    mynet = cidr_to_ips(subnet) 
-    for host in mynet:                   
-        if running_windows==True:
-            result = subprocess.run(['ping', '-n', '1', '-w', '1', str(host)],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        else:
-            result = subprocess.run(['ping', '-c', '1', '-W', '1', str(host)],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        if result.returncode == 0:
-            ip_list.append(str(host))
-            print(str(host)+ " is alive!")
-#Function to assign specific creds to hosts
-def specific_creds(ip_list):
-    for host in ip_list:
-        username=input(host+" Username:")
-        pwd=input(host+" Password:")
-        host_config.append(HostConfig(user=username,password=pwd))
-        if username!="root":
-            host_config_creds.append(pwd)
-        else:
-            host_config_creds.append("notrootpassword")
-    
+
+
 def parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,password_initial):
     print("[*]Starting SSH connections...")
     print("The following hosts have been added to Parallel SSH: ")
@@ -113,7 +84,7 @@ def parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,pass
     ###Executing Command
     print("Executing command: "+command_to_run)
     output = client.run_command(command_to_run,stop_on_errors=False,sudo=True,use_pty=True)
-
+    return_str=""
     ###Case 1:Using same creds for all hosts
     if len(password_initial)!=0:
         for host_out in output:
@@ -122,11 +93,16 @@ def parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,pass
                 host_out.stdin.flush()
                 hostname = host_out.host
                 stdout = list(host_out.stdout)
-                print("[SUCCESS]"+"Host %s: exit code %s, output %s" % (
-                    hostname, host_out.exit_code, stdout))
+                output_str = "[SUCCESS]"+"Host %s: exit code %s, output %s" % (
+                    hostname, host_out.exit_code, stdout)
+                print(output_str)
+                return_str=return_str+output_str+"\n"
             except Exception:
-                print("[FAIL]"+"Host %s: exception %s" % (
-                    host_out.host, host_out.exception))
+                output_str = "[FAIL]"+"Host %s: exception %s" % (
+                    host_out.host, host_out.exception)
+                print(output_str)
+                return_str=return_str+output_str+"\n"
+        return return_str
         #Uncomment this to debug!!! 
 #print(output)
     else:
@@ -143,12 +119,12 @@ def parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,pass
             hostname = host_output.host
             try:
                 stdout = list(host_output.stdout)
-                print("[SUCCESS]"+"Host %s: exit code %s, output %s" % (
+                return str("[SUCCESS]"+"Host %s: exit code %s, output %s" % (
                     hostname, host_output.exit_code, stdout))
             except Exception:
-                print("[FAIL]"+"Host %s: exception %s" % (
+                return str("[FAIL]"+"Host %s: exception %s" % (
                     host_output.host, host_output.exception))
-                pass
+                
 def main():     
     #print("Starting ping sweep...")
     #pingSweep()
@@ -204,7 +180,54 @@ def main():
     while (True):
         parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,password_initial)
         time.sleep(15)
-main()
+#main()
+def checker():
+    #print("Starting ping sweep...")
+    #pingSweep()
+    #print("Ping sweep complete! The following hosts have been added to Parallel SSH: ")
+    script_to_copy=""
+    ip_list=read_ssh_ips()
+    if len(ip_list)==0:
+        subnet=input("Input CIDR subnet: ")
+        subnet_ips=cidr_to_ips(subnet)
+        print("Starting SSH sweep...")
+        ip_list=scan_ips(subnet_ips)
+        file_path="ssh_ips.txt"
+        if not os.path.exists(file_path):
+            open(file_path, "w").close()
+        with open(file_path, "a") as f:
+            for item in ip_list:
+                f.write(item + "\n")
+        print("SSH sweep complete!")
+        print(ip_list)
+        print("")
+        print("You may quit this script now and modify "+file_path+" if any hosts need to be added/excluded.")
+   # answer1 = input("(1/2/3)")
+    #if answer1=='1':
+     #   pass
+    if True:
+        command_to_run = "date"
+    #if answer1=='3':
+     #   script_to_copy=input("Script local path:")
+     #   command_to_run ='set -m; chmod +x /tmp/'+script_to_copy+'; sleep 1; nohup /tmp/'+script_to_copy+' >/dev/null 2>&1 &'
+    #answer2 = input("Do you want to use different credentials for each host? (y/n) ").lower()
+    #if answer2 == "y":
+    #    print("OK!")
+    #    specific_creds(ip_list)
+    #    username=""
+    #    password_initial=""
+    #else:
+     #   if answer1=='1':
+    username="kali"
+    password_initial="kali"
+    #password_changed=input('New Password: ')
+    #command_to_run='echo root:'+password_changed+' | chpasswd'
+    while (True):
+        time.sleep(3)
+        output=str(parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,password_initial))
+        time.sleep(3)
+        return output
+        
 #To Compile using pyinstaller
 #pyinstaller --hidden-import ssh2.agent --hidden-import ssh2.pkey --hidden-import ssh2.channel --hidden-import ssh2.sftp_handle --hidden-import ssh2.listener --hidden-import ssh2.statinfo --hidden-import ssh2.knownhost --hidden-import ssh2.fileinfo --hidden-import ssh2.publickey --onefile parallelssh_v11.py
 #then staticx to make it statically linked

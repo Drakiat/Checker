@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import scrolledtext
 import threading
 import time
-
+import parallel
 root = tk.Tk()
 root.title("Red Team Checker GUI")
 
@@ -50,7 +50,36 @@ def update_text_boxes():
         text_box2.tag_config('blue', foreground='blue')  
         time.sleep(1)
 
+#Please comlpete the function below to call a function from another file that will continuously update the text boxes with the output of the parallel_ssh function
+#This function should be called in a new thread so that the GUI remains responsive and will continuously update the text boxes with the output of the parallel_ssh function
+def pssh():
+    while True:
+        # Call the parallel_ssh function and get its output
+        output1 = parallel.checker()
+        output1_list = output1.split('\n')
+        
+        for item in output1_list:
+            if "FAIL" in item:
+                tag = 'red'
+            else:
+                tag = 'green'
+            
+            # Update text_box1 with each item of the list
+            text_box1.configure(state='normal')
+            text_box1.insert('end', item + '\n', tag)
+            text_box1.configure(state='disabled')
+
+        # Configure the tags
+        text_box1.tag_config('red', foreground='red')
+        text_box1.tag_config('green', foreground='green')  
+
+        time.sleep(1)
+
 # Start a new thread that updates the text boxes every 10 seconds
-threading.Thread(target=update_text_boxes, daemon=True).start()
+threading.Thread(target=pssh, daemon=True).start()
+
+
+# Start a new thread that updates the text boxes every 10 seconds
+#threading.Thread(target=update_text_boxes, daemon=True).start()
 
 root.mainloop()
