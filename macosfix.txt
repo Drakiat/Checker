@@ -1,0 +1,2 @@
+ulimit -n 2048
+export DYLD_LIBRARY_PATH=/opt/homebrew/Cellar/libssh2/1.11.0_1/lib/
