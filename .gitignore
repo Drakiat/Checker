@@ -1,3 +1,5 @@
 env
 __pycache__
 ssh_ips.txt
+.DS_Store
+scoring.csv
