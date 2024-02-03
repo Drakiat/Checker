@@ -191,7 +191,6 @@ def checker():
         subnet=input("Input CIDR subnet: ")
         subnet_ips=cidr_to_ips(subnet)
         print("Starting SSH sweep...")
-        ip_list=scan_ips(subnet_ips)
         file_path="ssh_ips.txt"
         if not os.path.exists(file_path):
             open(file_path, "w").close()
