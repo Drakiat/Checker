@@ -206,7 +206,7 @@ def checker():
     #if answer1=='1':
      #   pass
     if True:
-        command_to_run = "date"
+        command_to_run = "uname -a && whoami"
     #if answer1=='3':
      #   script_to_copy=input("Script local path:")
      #   command_to_run ='set -m; chmod +x /tmp/'+script_to_copy+'; sleep 1; nohup /tmp/'+script_to_copy+' >/dev/null 2>&1 &'

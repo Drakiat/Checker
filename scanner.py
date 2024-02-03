@@ -1,6 +1,20 @@
 import nmap
-nm = nmap.PortScanner()
-nm.scan(hosts='192.168.2.0/24', arguments='-n -sP -PE -PA21,23,80,3389 --min-rate 4500 --max-rtt-timeout 1500ms')
-hosts_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
-for host, status in hosts_list:
-	print('{0}:{1}'.host)
+
+def scan_ips(ips, ports):
+	nm = nmap.PortScanner()
+	results = {}
+	
+	for ip in ips:
+		nm.scan(ip, arguments='-p {0} --min-rate 4500 --max-rtt-timeout 1500ms'.format(ports))
+		for host in nm.all_hosts():
+			for port in nm[host]['tcp']:
+				status = nm[host]['tcp'][port]['state']
+				key = f"{host},{port}"
+				results[key] = status
+	
+	return results
+
+#ips = ['192.168.2.19', '192.168.2.1', '192.168.2.21']
+#ports = '21,22,80,443,3389'
+#results = scan_ips(ips, ports)
+#print(results)
