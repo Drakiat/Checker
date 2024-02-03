@@ -1,3 +1,5 @@
+__pycache__/
+*.py[cod]
 env
 __pycache__
 ssh_ips.txt
