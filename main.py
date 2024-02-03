@@ -23,19 +23,16 @@ tabControl = ttk.Notebook(root)
 
 tab1 = ttk.Frame(tabControl)
 tab2 = ttk.Frame(tabControl)
-tab3 = ttk.Frame(tabControl)
+
 
 tabControl.add(tab1, text ='Default Credentials')
 tabControl.add(tab2, text ='Open Ports')
-tabControl.add(tab3, text ='Table')
+
 
 tabControl.pack(expand = 1, fill ="both")
 
 ttk.Label(tab1, text="Default Credentials").grid(column=0, row=0, padx=30, pady=30)
 ttk.Label(tab2, text="Open Ports").grid(column=0, row=0, padx=30, pady=30)
-ttk.Label(tab3, text="Table").grid(column=0, row=0, padx=30, pady=30)
-
-
 
 # Add a read-only text box to tab1
 text_box1 = scrolledtext.ScrolledText(tab1)
@@ -141,7 +138,7 @@ def PortScanner():
         time.sleep(scan_sleep)
 
 # Start a new thread that updates the text boxes every 10 seconds
-#threading.Thread(target=pssh, daemon=True).start()
+threading.Thread(target=pssh, daemon=True).start()
 threading.Thread(target=PortScanner, daemon=True).start()
 
 

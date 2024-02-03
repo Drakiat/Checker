@@ -29,45 +29,7 @@ else:
     print('Running on Unix-like system')
     running_windows=False
 
-#function to change cidr range to ip list
-def cidr_to_ips(cidr):
-    net, mask = cidr.split('/')
-    mask = int(mask)
-    net = list(map(int, net.split('.')))
-    net_int = (net[0] << 24) + (net[1] << 16) + (net[2] << 8) + net[3]
-    mask_int = (0xffffffff << (32 - mask)) & 0xffffffff
-    ips = [f'{(net_int + i >> 24) & 0xff}.{(net_int + i >> 16) & 0xff}.{(net_int + i >> 8) & 0xff}.{(net_int + i) & 0xff}' for i in range(0, 2**(32-mask)-1)]
-    return ips
-
-
-def check_port_22(ip):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(5)
-    result = sock.connect_ex((ip, 22))
-    sock.close()
-    if result == 0:
-        return ip
-    return None
-#Function to read from file if it exists
-def read_ssh_ips():
-    file_path = "ssh_ips.txt"
-    if os.path.isfile(file_path):
-        #answer = input("File ssh_ips.txt found! Do you want to import IPs from ssh_ips.txt? (y/n) ").lower()
-        if True:
-            pass
-        else:
-            os.remove(file_path)
-            return []
-        with open(file_path, "r") as f:
-            ips = [line.strip() for line in f.readlines()]
-        return ips
-    else:
-        print(f"File {file_path} does not exist")
-        return []
-
-
 def parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,password_initial):
-    print("[*]Starting SSH connections...")
     print("The following hosts have been added to Parallel SSH: ")
     print(ip_list)
     print(" ")
@@ -124,69 +86,35 @@ def parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,pass
             except Exception:
                 return str("[FAIL]"+"Host %s: exception %s" % (
                     host_output.host, host_output.exception))
-                
-def main():     
-    #print("Starting ping sweep...")
-    #pingSweep()
-    #print("Ping sweep complete! The following hosts have been added to Parallel SSH: ")
-    script_to_copy=""
-    ip_list=read_ssh_ips()
-    if len(ip_list)==0:
-        subnet=input("Input CIDR subnet: ")
-        subnet_ips=cidr_to_ips(subnet)
-        print("Starting SSH sweep...")
-        ip_list=scan_ips(subnet_ips)
-        file_path="ssh_ips.txt"
-        if not os.path.exists(file_path):
-            open(file_path, "w").close()
-        with open(file_path, "a") as f:
-            for item in ip_list:
-                f.write(item + "\n")
-        print("SSH sweep complete!")
-        print(ip_list)
-        print("")
-        print("You may quit this script now and modify "+file_path+" if any hosts need to be added/excluded.")
+def parallel_ssh_v2(ip_list,host_config,command_to_run):
+    #Connect to the hosts and run commands
+    client = ParallelSSHClient(ip_list, host_config=host_config,timeout=30,num_retries=1)
+    ###Executing Command
+    print("Executing command: "+command_to_run)
+    output = client.run_command(command_to_run,stop_on_errors=False,sudo=True,use_pty=True)
+    return_str=""
 
-    print("")
-    print("")
+    ###Case 2:Using different creds for all hosts
+    value=0
+    for host_out in output:
+        try:
+            host_out.stdin.write(host_config_creds[value]+'\n')
+            host_out.stdin.flush()
+            value=value+1
+        except Exception:
+            value=value+1
+    for host_output in output:
+        hostname = host_output.host
+        try:
+            stdout = list(host_output.stdout)
+            return str("[SUCCESS]"+"Host %s: exit code %s, output %s" % (
+                hostname, host_output.exit_code, stdout))
+        except Exception:
+            return str("[FAIL]"+"Host %s: exception %s" % (
+                host_output.host, host_output.exception))               
+def cidr_to_ips(cidr):   
+def checker(ip_list):
 
-    print("Do you want to: ")
-    print("(1)Change a user's password")
-    print("(2)Run a command on every host")
-    print("(3)Run a local script on every host")
-    answer1 = input("(1/2/3)")
-    if answer1=='1':
-        pass
-    if answer1=='2':
-        command_to_run = input("Command: ")
-    if answer1=='3':
-        script_to_copy=input("Script local path:")
-        command_to_run ='set -m; chmod +x /tmp/'+script_to_copy+'; sleep 1; nohup /tmp/'+script_to_copy+' >/dev/null 2>&1 &'
-    answer2 = input("Do you want to use different credentials for each host? (y/n) ").lower()
-    if answer2 == "y":
-        print("OK!")
-        specific_creds(ip_list)
-        username=""
-        password_initial=""
-    else:
-        if answer1=='1':
-            username=input("Username: ")
-            password_initial=input('Old Password: ')
-            password_changed=input('New Password: ')
-            command_to_run='echo root:'+password_changed+' | chpasswd'
-        else:
-            username=input("Username: ")
-            password_initial=input('Password: ')
-    while (True):
-        parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,password_initial)
-        time.sleep(15)
-#main()
-def checker():
-    #print("Starting ping sweep...")
-    #pingSweep()
-    #print("Ping sweep complete! The following hosts have been added to Parallel SSH: ")
-    script_to_copy=""
-    ip_list=read_ssh_ips()
     if len(ip_list)==0:
         subnet=input("Input CIDR subnet: ")
         subnet_ips=cidr_to_ips(subnet)
@@ -197,32 +125,11 @@ def checker():
         with open(file_path, "a") as f:
             for item in ip_list:
                 f.write(item + "\n")
-        print("SSH sweep complete!")
-        print(ip_list)
-        print("")
-        print("You may quit this script now and modify "+file_path+" if any hosts need to be added/excluded.")
-   # answer1 = input("(1/2/3)")
-    #if answer1=='1':
-     #   pass
-    if True:
-        command_to_run = "uname -a && whoami"
-    #if answer1=='3':
-     #   script_to_copy=input("Script local path:")
-     #   command_to_run ='set -m; chmod +x /tmp/'+script_to_copy+'; sleep 1; nohup /tmp/'+script_to_copy+' >/dev/null 2>&1 &'
-    #answer2 = input("Do you want to use different credentials for each host? (y/n) ").lower()
-    #if answer2 == "y":
-    #    print("OK!")
-    #    specific_creds(ip_list)
-    #    username=""
-    #    password_initial=""
-    #else:
-     #   if answer1=='1':
+    command_to_run = "uname -a && whoami"
     username="kali"
     password_initial="kali"
-    #password_changed=input('New Password: ')
-    #command_to_run='echo root:'+password_changed+' | chpasswd'
+
     while (True):
-        time.sleep(3)
         output=str(parallel_ssh(ip_list,host_config,command_to_run,script_to_copy,username,password_initial))
         time.sleep(3)
         return output
