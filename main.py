@@ -45,14 +45,16 @@ text_box2 = scrolledtext.ScrolledText(tab2)
 text_box2.grid(column=0, row=1, padx=30, pady=30, sticky="nsew")
 text_box2.configure(state ='disabled') # Make it read-only
 
-# Add a radio button to tab1
-enabled_radio1 = ttk.Checkbutton(tab1, text="Enabled")
-enabled_radio1.grid(column=1, row=1, padx=10, pady=10)
 
-# Add a radio button to tab2
-enabled_radio2 = ttk.Checkbutton(tab2, text="Enabled")
-enabled_radio2.grid(column=1, row=1, padx=10, pady=10)
 
+# Add a check button to tab1
+enabled_check_pssh = tk.BooleanVar()
+enabled_checkbutton1 = ttk.Checkbutton(tab1, text="Enable", variable=enabled_check_pssh)
+enabled_checkbutton1.grid(column=1, row=1, padx=10, pady=10)
+# Add a check button to tab2
+enabled_check_scanner = tk.BooleanVar()
+enabled_checkbutton2 = ttk.Checkbutton(tab2, text="Enable", variable=enabled_check_scanner)
+enabled_checkbutton2.grid(column=1, row=1, padx=10, pady=10)
 # Configure the row containing the text boxes to expand with the window
 tab1.grid_rowconfigure(1, weight=1)
 tab1.grid_columnconfigure(0, weight=1)
@@ -77,48 +79,30 @@ def csv_to_dictionary(file_path):
 
 
 def pssh():
-    """
-    Function to start parallel SSH and display the output in a text box.
-
-    This function starts the parallel SSH process, retrieves its output,
-    and updates a text box with the output. The output is color-coded based
-    on the presence of the word "FAIL" in each item of the output.
-
-    Args:
-        None
-
-    Returns:
-        None
-    """
     while True:
-        # Start scan 
-        text_box1.configure(state='normal')
-        text_box1.insert('end', "Starting parallel SSH at " + str(datetime.datetime.now()) + "\n")
-        text_box1.configure(state='disabled')
-        text_box1.see('end')
-        # Call the parallel_ssh function and get its output
-        output1 = parallel.checker(login_file,command_to_run)
-        output1_list = output1.split('\n')
-        for item in output1_list:
-            if "FAIL" in item:
-                tag = 'red'
-            else:
-                tag = 'green'
-            # Update text_box1 with each item of the list
+        if enabled_check_pssh.get()==True:
+            # Start scan 
             text_box1.configure(state='normal')
-            text_box1.insert('end', item + '\n', tag)
-            text_box1.configure(state='disabled')  
+            text_box1.insert('end', "Starting parallel SSH at " + str(datetime.datetime.now()) + "\n")
+            text_box1.configure(state='disabled')
             text_box1.see('end')
-        time.sleep(ssh_sleep)
+            # Call the parallel_ssh function and get its output
+            output1 = parallel.checker(login_file,command_to_run)
+            output1_list = output1.split('\n')
+            for item in output1_list:
+                if "FAIL" in item:
+                    tag = 'red'
+                else:
+                    tag = 'green'
+                # Update text_box1 with each item of the list
+                text_box1.configure(state='normal')
+                text_box1.insert('end', item + '\n', tag)
+                text_box1.configure(state='disabled')  
+                text_box1.see('end')
+            time.sleep(ssh_sleep)
 ##Port Scanner
 def PortScanner():
-    """
-    This function performs port scanning on a set of IP addresses and ports.
-    It retrieves the IP addresses and ports from a scoring file and scans them using a scanner object.
-    The results are displayed in a text box.
-    """
-    # Rest of the code...
-def PortScanner():
+    
     #This is the dictionary that will be used to store the ips and ports that are scored
     #scored={"192.168.2.19":[22,80],"192.168.2.1":[22,80]}
     scored=csv_to_dictionary(scoring_file)
@@ -134,42 +118,42 @@ def PortScanner():
     ports=str(ports[:-1])
 #main loop
     while True:
-        #Start scan 
-        text_box2.configure(state='normal')
-        text_box2.insert('end',"Starting scan at "+str(datetime.datetime.now())+"\n")
-        text_box2.configure(state='disabled')
-        text_box2.see('end')
-        nm=scanner.scan_ips(ipset,ports)
-        for key in nm:
-            #check if the key is in the scored dictionary
-            key_checked=key.split(",")[0]
-            if key_checked in scored.keys():
-                value_checked=int(key.split(",")[1])
-                if str(value_checked) in scored[key_checked].split(","):
-                    #Print text
-                    if nm[key] == "open":
-                        tag = 'green'
-                    else:
-                        tag = 'red'
-                    text_box2.configure(state='normal')
-                    text_box2.insert('end', key + ' ' + nm[key] + '\n', tag)
-                    text_box2.configure(state='disabled')
-                    text_box2.see('end')
-            else:
-                print("Key not found")
-                continue
-        ##Sleep for 20 seconds
-        text_box2.configure(state='normal')
-        text_box2.insert('end',"Sleeping for "+str(scan_sleep)+" seconds\n")
-        text_box2.configure(state='disabled')
-        text_box2.see('end')
-        time.sleep(scan_sleep)
+        if enabled_check_scanner.get()==True:
+            #Start scan 
+            text_box2.configure(state='normal')
+            text_box2.insert('end',"Starting scan at "+str(datetime.datetime.now())+"\n")
+            text_box2.configure(state='disabled')
+            text_box2.see('end')
+            nm=scanner.scan_ips(ipset,ports)
+            for key in nm:
+                #check if the key is in the scored dictionary
+                key_checked=key.split(",")[0]
+                if key_checked in scored.keys():
+                    value_checked=int(key.split(",")[1])
+                    if str(value_checked) in scored[key_checked].split(","):
+                        #Print text
+                        if nm[key] == "open":
+                            tag = 'green'
+                        else:
+                            tag = 'red'
+                        text_box2.configure(state='normal')
+                        text_box2.insert('end', key + ' ' + nm[key] + '\n', tag)
+                        text_box2.configure(state='disabled')
+                        text_box2.see('end')
+                else:
+                    print("Key not found")
+                    continue
+            ##Sleep for 20 seconds
+            text_box2.configure(state='normal')
+            text_box2.insert('end',"Sleeping for "+str(scan_sleep)+" seconds\n")
+            text_box2.configure(state='disabled')
+            text_box2.see('end')
+            time.sleep(scan_sleep)
 
 # Start a new thread that updates the text boxes every 10 seconds
 
 #threading.Thread(target=pssh, daemon=True).start()
 #threading.Thread(target=PortScanner, daemon=True).start()
-main_thread=threading.Thread(target=root.mainloop, daemon=True).start()
 pssh_thread=threading.Thread(target=pssh, daemon=True).start()
 PortScanner_thread=threading.Thread(target=PortScanner, daemon=True).start()
 # Start a new thread that updates the text boxes every 10 seconds
