@@ -67,12 +67,24 @@ def csv_to_dictionary(file_path):
     return dictionary
 
 
-#This function should be called in a new thread so that the GUI remains responsive and will continuously update the text boxes with the output of the parallel_ssh function
 def pssh():
+    """
+    Function to start parallel SSH and display the output in a text box.
+
+    This function starts the parallel SSH process, retrieves its output,
+    and updates a text box with the output. The output is color-coded based
+    on the presence of the word "FAIL" in each item of the output.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     while True:
-        #Start scan 
+        # Start scan 
         text_box1.configure(state='normal')
-        text_box1.insert('end',"Starting parallel SSH at "+str(datetime.datetime.now())+"\n")
+        text_box1.insert('end', "Starting parallel SSH at " + str(datetime.datetime.now()) + "\n")
         text_box1.configure(state='disabled')
         text_box1.see('end')
         # Call the parallel_ssh function and get its output
@@ -90,6 +102,13 @@ def pssh():
             text_box1.see('end')
         time.sleep(ssh_sleep)
 ##Port Scanner
+def PortScanner():
+    """
+    This function performs port scanning on a set of IP addresses and ports.
+    It retrieves the IP addresses and ports from a scoring file and scans them using a scanner object.
+    The results are displayed in a text box.
+    """
+    # Rest of the code...
 def PortScanner():
     #This is the dictionary that will be used to store the ips and ports that are scored
     #scored={"192.168.2.19":[22,80],"192.168.2.1":[22,80]}
