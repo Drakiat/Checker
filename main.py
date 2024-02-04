@@ -11,6 +11,7 @@ import datetime
 ##Config files
 scoring_file = 'scoring.csv'
 login_file = 'logins.csv'
+command_to_run = "id && hostname"
 #Sleep time for the port scanner and ssh in seconds
 scan_sleep = 20
 ssh_sleep = 10
@@ -88,7 +89,7 @@ def pssh():
         text_box1.configure(state='disabled')
         text_box1.see('end')
         # Call the parallel_ssh function and get its output
-        output1 = parallel.checker(login_file)
+        output1 = parallel.checker(login_file,command_to_run)
         output1_list = output1.split('\n')
         for item in output1_list:
             if "FAIL" in item:

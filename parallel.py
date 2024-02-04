@@ -78,7 +78,7 @@ def csv_to_dict(filename):
             result.append({ip: {'username': username, 'password': password}})
     return result
 
-def checker(ip_list):
+def checker(ip_list,command_to_run):
     ips_logins=csv_to_dict(ip_list)
     ips=[]
     host_config = []
@@ -86,7 +86,6 @@ def checker(ip_list):
         for ip, credentials in login.items():
             ips.append(ip)
             host_config.append(HostConfig(user=credentials['username'], password=credentials['password']))
-    command_to_run = "uname -a && whoami"
     output=str(parallel_ssh_v2(ips,host_config,command_to_run))
     #print(output)
     return output
