@@ -11,9 +11,9 @@ import datetime
 ##Config files
 scoring_file = 'scoring.csv'
 login_file = 'logins.csv'
-#Sleep time for the port scanner in seconds
+#Sleep time for the port scanner and ssh in seconds
 scan_sleep = 20
-
+ssh_sleep = 10
 
 
 root = tk.Tk()
@@ -64,31 +64,31 @@ def csv_to_dictionary(file_path):
             key = row[0]
             value = str(row[1])
             dictionary[key] = dictionary[key]+","+value if key in dictionary else value
-    print(dictionary)
     return dictionary
 
 
 #This function should be called in a new thread so that the GUI remains responsive and will continuously update the text boxes with the output of the parallel_ssh function
 def pssh():
-
     while True:
+        #Start scan 
+        text_box1.configure(state='normal')
+        text_box1.insert('end',"Starting parallel SSH at "+str(datetime.datetime.now())+"\n")
+        text_box1.configure(state='disabled')
+        text_box1.see('end')
         # Call the parallel_ssh function and get its output
-        output1 = parallel.checker()
+        output1 = parallel.checker(login_file)
         output1_list = output1.split('\n')
-        
         for item in output1_list:
             if "FAIL" in item:
                 tag = 'red'
             else:
                 tag = 'green'
-            
             # Update text_box1 with each item of the list
             text_box1.configure(state='normal')
             text_box1.insert('end', item + '\n', tag)
             text_box1.configure(state='disabled')  
             text_box1.see('end')
-
-        time.sleep(1)
+        time.sleep(ssh_sleep)
 ##Port Scanner
 def PortScanner():
     #This is the dictionary that will be used to store the ips and ports that are scored
@@ -138,6 +138,7 @@ def PortScanner():
         time.sleep(scan_sleep)
 
 # Start a new thread that updates the text boxes every 10 seconds
+
 threading.Thread(target=pssh, daemon=True).start()
 threading.Thread(target=PortScanner, daemon=True).start()
 
