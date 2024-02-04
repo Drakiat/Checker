@@ -99,6 +99,11 @@ def pssh():
                 text_box1.insert('end', item + '\n', tag)
                 text_box1.configure(state='disabled')  
                 text_box1.see('end')
+            #sleep for configured seconds
+            text_box1.configure(state='normal')
+            text_box1.insert('end', "Sleeping for " +str(ssh_sleep) +" seconds\n")
+            text_box1.configure(state='disabled')
+            text_box1.see('end')
             time.sleep(ssh_sleep)
 ##Port Scanner
 def PortScanner():

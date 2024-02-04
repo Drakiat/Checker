@@ -49,19 +49,19 @@ def parallel_ssh_v2(ip_list, host_configuration, command_to_run):
                     print("Host: " + host_out.host + " has stdout")
                     stdout = list(host_out.stdout)
                     print(stdout)
-                    success_message = "[SUCCESS] Host %s: exit code %s, output %s\n" % (
+                    success_message = "✅[SUCCESS] Host %s: exit code %s, output %s\n" % (
                     hostname, host_out.exit_code, stdout)
                     msg=msg+success_message
             else:
                 print("No stdin for host: " + host_out.host)
                 value = value + 1
-                fail_message = "[FAIL] Host %s: exception %s\n" % (
+                fail_message = "🛑[FAIL] Host %s: exception %s\n" % (
                 host_out.host, host_out.exception)
                 msg=msg+fail_message
         except Exception as e:
             print("Exception: "+str(e))
             value = value + 1
-            fail_message = "[FAIL] Host %s: exception %s\n" % (
+            fail_message = "🛑[FAIL] Host %s: exception %s\n" % (
                 host_out.host, host_out.exception)
             msg=msg+fail_message
             pass
