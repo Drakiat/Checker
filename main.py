@@ -45,6 +45,14 @@ text_box2 = scrolledtext.ScrolledText(tab2)
 text_box2.grid(column=0, row=1, padx=30, pady=30, sticky="nsew")
 text_box2.configure(state ='disabled') # Make it read-only
 
+# Add a radio button to tab1
+enabled_radio1 = ttk.Checkbutton(tab1, text="Enabled")
+enabled_radio1.grid(column=1, row=1, padx=10, pady=10)
+
+# Add a radio button to tab2
+enabled_radio2 = ttk.Checkbutton(tab2, text="Enabled")
+enabled_radio2.grid(column=1, row=1, padx=10, pady=10)
+
 # Configure the row containing the text boxes to expand with the window
 tab1.grid_rowconfigure(1, weight=1)
 tab1.grid_columnconfigure(0, weight=1)
@@ -159,10 +167,11 @@ def PortScanner():
 
 # Start a new thread that updates the text boxes every 10 seconds
 
-threading.Thread(target=pssh, daemon=True).start()
-threading.Thread(target=PortScanner, daemon=True).start()
-
-
+#threading.Thread(target=pssh, daemon=True).start()
+#threading.Thread(target=PortScanner, daemon=True).start()
+main_thread=threading.Thread(target=root.mainloop, daemon=True).start()
+pssh_thread=threading.Thread(target=pssh, daemon=True).start()
+PortScanner_thread=threading.Thread(target=PortScanner, daemon=True).start()
 # Start a new thread that updates the text boxes every 10 seconds
 
 root.mainloop()
