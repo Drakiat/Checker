@@ -27,33 +27,37 @@ else:
 
 def parallel_ssh_v2(ip_list, host_configuration, command_to_run):
     # Connect to the hosts and run commands
-    client = ParallelSSHClient(ip_list, host_config=host_configuration, timeout=30, num_retries=1)
+    client = ParallelSSHClient(ip_list, host_config=host_configuration,timeout=10, num_retries=1)
     ###Executing Command
     print("Executing command: " + command_to_run)
     output = client.run_command(command_to_run, stop_on_errors=False, sudo=True, use_pty=True)
+    #client.join(output)
     value = 0
     msg=""
+    #print(output)
     #for value in range(len(host_config)):
       #  print("Host Config: "+str(host_configuration[value].user)+":"+str(host_configuration[value].password))
     for host_out in output:
-        hostname = host_out.host
         try:
             #print("Writing to stdin: " + host_configuration[value].password + " for host: " + host_out.host)
             if host_out.stdin is not None:
-                print("Writing to stdin: " + host_configuration[value].password + " for host: " + host_out.host)
-                host_out.stdin.write(host_configuration[value].password + '\n')
+                if host_configuration[value].user!="root":
+                    print("Escalating to sudo for user: " + host_configuration[value].user + " for host: " + host_out.host)
+                    host_out.stdin.write(host_configuration[value].password + '\n')
+                else:
+                    print("User already root: " + host_configuration[value].user + " for host: " + host_out.host)
+                    #host_out.stdin.write("censored" + '\n')
                 host_out.stdin.flush()
                 print("Host: " + host_out.host + " has been written to")
                 value = value + 1
                 if host_out.stdout:
                     print("Host: " + host_out.host + " has stdout")
                     stdout = list(host_out.stdout)
-                    print(stdout)
                     success_message = "✅[SUCCESS] Host %s: exit code %s, output %s\n" % (
-                    hostname, host_out.exit_code, stdout)
+                    host_out.host, host_out.exit_code, stdout)
                     msg=msg+success_message
             else:
-                print("No stdin for host: " + host_out.host)
+                print("Exception: " + host_out.host+" "+str(host_out.exception))
                 value = value + 1
                 fail_message = "🛑[FAIL] Host %s: exception %s\n" % (
                 host_out.host, host_out.exception)
