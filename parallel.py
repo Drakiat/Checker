@@ -32,14 +32,18 @@ def parallel_ssh_v2(ip_list, host_configuration, command_to_run):
     print("Executing command: " + command_to_run)
     output = client.run_command(command_to_run, stop_on_errors=False, sudo=True, use_pty=True)
     #client.join(output)
-    value = 0
     msg=""
     #print(output)
     #for value in range(len(host_config)):
       #  print("Host Config: "+str(host_configuration[value].user)+":"+str(host_configuration[value].password))
+    print("Output: "+str(output))
+    ##THE OUTPUT IS UNORDERED, FIX THIS
     for host_out in output:
+        #Using the alias set on each host to get the correct credentials
+        value = int(host_out.alias)
         try:
             #print("Writing to stdin: " + host_configuration[value].password + " for host: " + host_out.host)
+            print(host_configuration[value].user+" "+host_configuration[value].password+" "+host_out.host)
             if host_out.stdin is not None:
                 #Escalate to root if not already root
                 if host_configuration[value].user!="root":
@@ -56,23 +60,16 @@ def parallel_ssh_v2(ip_list, host_configuration, command_to_run):
                     success_message = "✅[SUCCESS] Host %s: exit code %s, output %s\n" % (
                     host_out.host, host_out.exit_code, stdout)
                     msg=msg+success_message
-                #next host
-                value = value + 1
             else:
                 print("Exception: " + host_out.host+" "+str(host_out.exception))
                 fail_message = "🛑[FAIL] Host %s: exception %s\n" % (
                 host_out.host, host_out.exception)
                 msg=msg+fail_message
-                #next host
-                value = value + 1
         except Exception as e:
             print("Exception: "+str(e))
-            value = value + 1
             fail_message = "🛑[FAIL] Host %s: exception %s\n" % (
                 host_out.host, host_out.exception)
             msg=msg+fail_message
-            #next host
-            value = value + 1
     return msg
 
 ##CHANGE THIS TO BE A LIST CONTAINING DICTIONARIES
@@ -90,10 +87,12 @@ def checker(ip_list,command_to_run):
     ips_logins=csv_to_dict(ip_list)
     ips=[]
     host_config = []
+    number_label=0
     for login in ips_logins:
         for ip, credentials in login.items():
             ips.append(ip)
-            host_config.append(HostConfig(user=credentials['username'], password=credentials['password']))
+            host_config.append(HostConfig(user=credentials['username'], password=credentials['password'],alias=str(number_label)))
+            number_label=number_label+1
     output=str(parallel_ssh_v2(ips,host_config,command_to_run))
     #print(output)
     return output
