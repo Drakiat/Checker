@@ -12,4 +12,7 @@ def scan_ips(ip_addresses, ports):
         for port in res['scan'][ip]['tcp']:
             if res['scan'][ip]['tcp'][port]['state'] == 'open':
                 open_ports[ip].append(port)
+    for ip in ip_addresses:
+        if ip not in open_ports.keys():
+            open_ports[ip]=["No open ports found."]
     return open_ports

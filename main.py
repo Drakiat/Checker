@@ -135,7 +135,10 @@ def PortScanner():
                     text_box2.configure(state='normal')
                     text_box2.insert('end',key,'cyan')
                     text_box2.insert('end',":")
-                    text_box2.insert('end',str(nm[key])+"\n",'yellow')
+                    if nm[key]==["No open ports found."]:
+                        text_box2.insert('end'," No open ports found.\n",'red')
+                    else:
+                        text_box2.insert('end',str(nm[key])+"\n",'yellow')
                     text_box2.configure(state='disabled')
                     text_box2.see('end')
                     i=i+1
