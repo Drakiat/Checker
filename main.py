@@ -17,9 +17,11 @@ scan_sleep = 20
 ssh_sleep = 10
 #List of ports to scan, this is the nmap list of top 1000 ports
 ports=[80,23,443,21,22,25,3389,110,445,139,143,53,135,3306,8080,1723,111,995,993,5900,1025,587,8888,199,1720,465,548,113,81,6001,10000,514,5060,179,1026,2000,8443,8000,32768,554,26,1433,49152,2001,515,8008,49154,1027,5666,646,5000,5631,631,49153,8081,2049,88,79,5800,106,2121,1110,49155,6000,513,990,5357,427,49156,543,544,5101,144,7,389,8009,3128,444,9999,5009,7070,5190,3000,5432,1900]
+print("Number of ports set to scan: ",len(ports))
 
+# Create the main window
 root = tk.Tk()
-root.title("Red Team Checker GUI")
+root.title("Checker GUI by wyldgoat")
 
 tabControl = ttk.Notebook(root)
 
@@ -68,8 +70,8 @@ text_box1.tag_config('green', foreground='green')
 text_box2.tag_config('red', foreground='red')
 text_box2.tag_config('green', foreground='green')
 text_box2.tag_config('blue', foreground='blue')
-text_box2.tag_config('yellow', foreground='yellow')
-text_box2.tag_config('cyan', foreground='cyan')
+text_box2.tag_config('gold', foreground='gold2')
+text_box2.tag_config('cyan', foreground='RoyalBlue3')
 
 #Parse csv to make dictionnaries
 def csv_to_dictionary(file_path):
@@ -138,7 +140,7 @@ def PortScanner():
                     if nm[key]==["No open ports found."]:
                         text_box2.insert('end'," No open ports found.\n",'red')
                     else:
-                        text_box2.insert('end',str(nm[key])+"\n",'yellow')
+                        text_box2.insert('end',str(nm[key])+"\n",'gold')
                     text_box2.configure(state='disabled')
                     text_box2.see('end')
                     i=i+1
