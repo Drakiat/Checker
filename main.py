@@ -71,7 +71,7 @@ text_box2.tag_config('red', foreground='red')
 text_box2.tag_config('green', foreground='green')
 text_box2.tag_config('blue', foreground='blue')
 text_box2.tag_config('gold', foreground='gold2')
-text_box2.tag_config('cyan', foreground='RoyalBlue3')
+text_box2.tag_config('RoyalBlue', foreground='RoyalBlue3')
 
 #Parse csv to make dictionnaries
 def csv_to_dictionary(file_path):
@@ -135,7 +135,7 @@ def PortScanner():
                 #check if the key is in the scored dictionary
                 if key in ips:
                     text_box2.configure(state='normal')
-                    text_box2.insert('end',key,'cyan')
+                    text_box2.insert('end',key,'RoyalBlue')
                     text_box2.insert('end',":")
                     if nm[key]==["No open ports found."]:
                         text_box2.insert('end'," No open ports found.\n",'red')
