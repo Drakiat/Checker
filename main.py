@@ -9,13 +9,14 @@ import csv
 import datetime
 
 ##Config files
-scoring_file = 'scoring.csv'
+ip_file = 'ip_file.txt'
 login_file = 'logins.csv'
 command_to_run = "id && hostname"
 #Sleep time for the port scanner and ssh in seconds
 scan_sleep = 20
 ssh_sleep = 10
-
+#List of ports to scan, this is the nmap list of top 1000 ports
+ports=[80,23,443,21,22,25,3389,110,445,139,143,53,135,3306,8080,1723,111,995,993,5900,1025,587,8888,199,1720,465,548,113,81,6001,10000,514,5060,179,1026,2000,8443,8000,32768,554,26,1433,49152,2001,515,8008,49154,1027,5666,646,5000,5631,631,49153,8081,2049,88,79,5800,106,2121,1110,49155,6000,513,990,5357,427,49156,543,544,5101,144,7,389,8009,3128,444,9999,5009,7070,5190,3000,5432,1900]
 
 root = tk.Tk()
 root.title("Red Team Checker GUI")
@@ -63,8 +64,12 @@ tab2.grid_columnconfigure(0, weight=1)
 #configure colors
 text_box1.tag_config('red', foreground='red')
 text_box1.tag_config('green', foreground='green')
+
 text_box2.tag_config('red', foreground='red')
 text_box2.tag_config('green', foreground='green')
+text_box2.tag_config('blue', foreground='blue')
+text_box2.tag_config('yellow', foreground='yellow')
+text_box2.tag_config('cyan', foreground='cyan')
 
 #Parse csv to make dictionnaries
 def csv_to_dictionary(file_path):
@@ -110,44 +115,30 @@ def PortScanner():
     
     #This is the dictionary that will be used to store the ips and ports that are scored
     #scored={"192.168.2.19":[22,80],"192.168.2.1":[22,80]}
-    scored=csv_to_dictionary(scoring_file)
 #This is gross but it works ipset(set) and ports(string) are used to store the ips and ports to scan
-    ports=''
-    ipset=set()
-    portset=set()
-    for key in scored.keys():
-        ipset.add(key)
-        portset.add(str(scored[key]))
-    for item in portset:
-        ports+=str(item)+','
-    ports=str(ports[:-1])
+    with open(ip_file) as f:
+        ips = f.read().splitlines()
 #main loop
     while True:
         if enabled_check_scanner.get()==True:
-            #Start scan 
+            #Show date
             text_box2.configure(state='normal')
             text_box2.insert('end',"Starting scan at "+str(datetime.datetime.now())+"\n")
             text_box2.configure(state='disabled')
             text_box2.see('end')
-            nm=scanner.scan_ips(ipset,ports)
-            for key in nm:
+            #Start Scan
+            nm=scanner.scan_ips(ips,ports)
+            i=0
+            for key in nm.keys():
                 #check if the key is in the scored dictionary
-                key_checked=key.split(",")[0]
-                if key_checked in scored.keys():
-                    value_checked=int(key.split(",")[1])
-                    if str(value_checked) in scored[key_checked].split(","):
-                        #Print text
-                        if nm[key] == "open":
-                            tag = 'green'
-                        else:
-                            tag = 'red'
-                        text_box2.configure(state='normal')
-                        text_box2.insert('end', key + ' ' + nm[key] + '\n', tag)
-                        text_box2.configure(state='disabled')
-                        text_box2.see('end')
-                else:
-                    print("Key not found")
-                    continue
+                if key in ips:
+                    text_box2.configure(state='normal')
+                    text_box2.insert('end',key,'cyan')
+                    text_box2.insert('end',":")
+                    text_box2.insert('end',str(nm[key])+"\n",'yellow')
+                    text_box2.configure(state='disabled')
+                    text_box2.see('end')
+                    i=i+1
             ##Sleep for 20 seconds
             text_box2.configure(state='normal')
             text_box2.insert('end',"Sleeping for "+str(scan_sleep)+" seconds\n")

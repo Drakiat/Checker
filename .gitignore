@@ -6,3 +6,4 @@ ssh_ips.txt
 .DS_Store
 scoring.csv
 logins.csv
+ip_file.txt
