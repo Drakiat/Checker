@@ -1,6 +1,6 @@
 # RedTeam-Checker
 
-RedTeam-Checker is an automated tool designed to monitor the persistence of backdoors and default settings on compromised machines over time.
+RedTeam-Checker is an automated tool designed to monitor the persistence of compromised accounts and open ports on compromised machines over time.
 
 ## Compatibility
 This tool is built to support Python 3.10. Please note that Python versions 3.11 and higher are not supported and might not be compatible with the parallel-ssh library.
@@ -16,7 +16,7 @@ pip install -r requirements.txt
    ip,username:password
    ```
 
-2. Create a `ip_file` file to set the target ips to scan, which will continutly scanned for ports and output open ports. The format for this file should one ip per line:
+2. Create a `ip_file.txt` file to set the target ips to scan, which will continutly scanned for ports and output open ports. The format for this file should one ip per line:
    ```
    127.0.0.1
    192.168.1.1
