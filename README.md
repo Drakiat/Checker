@@ -16,12 +16,13 @@ pip install -r requirements.txt
    ip,username:password
    ```
 
-2. Create a `scoring.csv` file to set the target scoring, which will continutly scan for ports and check their state using nmap. The format for this file should be:
+2. Create a `ip_file` file to set the target ips to scan, which will continutly scanned for ports and output open ports. The format for this file should one ip per line:
    ```
-   ip,port
+   127.0.0.1
+   192.168.1.1
    ```
 3. Start the program:
    ```
    python3 main.py
    ```
-Feel free to customize the files according to your specific requirements.
+Feel free to modify the variable in main.py according to your specific requirements.
