@@ -1,6 +1,6 @@
-# RedTeam-Checker
+# Checker
 
-RedTeam-Checker is an automated tool designed to monitor the persistence of compromised accounts and open ports on compromised machines over time.
+Checker is an automated tool designed to monitor the persistence of compromised accounts and open ports on compromised machines over time during red team engagements.
 
 ## Compatibility
 This tool is built to support Python 3.10. Please note that Python versions 3.11 and higher are not supported and might not be compatible with the parallel-ssh library.
