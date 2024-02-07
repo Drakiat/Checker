@@ -49,11 +49,11 @@ text_box2.configure(state ='disabled') # Make it read-only
 
 
 # Add a check button to tab1
-enabled_check_pssh = tk.BooleanVar()
+enabled_check_pssh = tk.BooleanVar(value=True)
 enabled_checkbutton1 = ttk.Checkbutton(tab1, text="Enable", variable=enabled_check_pssh)
 enabled_checkbutton1.grid(column=1, row=1, padx=10, pady=10)
 # Add a check button to tab2
-enabled_check_scanner = tk.BooleanVar()
+enabled_check_scanner = tk.BooleanVar(value=True)
 enabled_checkbutton2 = ttk.Checkbutton(tab2, text="Enable", variable=enabled_check_scanner)
 enabled_checkbutton2.grid(column=1, row=1, padx=10, pady=10)
 # Configure the row containing the text boxes to expand with the window
