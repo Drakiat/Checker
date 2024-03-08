@@ -1,6 +1,8 @@
 # Checker
 
 Checker is an automated tool designed to monitor the persistence of compromised accounts and open ports on compromised machines over time during red team engagements.
+<img width="771" alt="image" src="https://github.com/Drakiat/Checker/assets/70113570/6c3ec0b9-8460-4bbe-aee1-e7ab28ad60cb">
+
 
 ## Compatibility
 This tool is built to support Python 3.10. Please note that Python versions 3.11 and higher are not supported and might not be compatible with the parallel-ssh library.
