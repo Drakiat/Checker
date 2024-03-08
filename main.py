@@ -11,6 +11,7 @@ import datetime
 ##Config files
 ip_file = 'ip_file.txt'
 login_file = 'logins.csv'
+web_file = 'web_file.txt'
 command_to_run = "id && hostname"
 #Sleep time for the port scanner and ssh in seconds
 scan_sleep = 20
@@ -27,16 +28,18 @@ tabControl = ttk.Notebook(root)
 
 tab1 = ttk.Frame(tabControl)
 tab2 = ttk.Frame(tabControl)
-
+tab3 = ttk.Frame(tabControl)
 
 tabControl.add(tab1, text ='Default Credentials')
 tabControl.add(tab2, text ='Open Ports')
+tabControl.add(tab3, text ='Web Scanner')
 
 
 tabControl.pack(expand = 1, fill ="both")
 
 ttk.Label(tab1, text="Default Credentials").grid(column=0, row=0, padx=30, pady=30)
 ttk.Label(tab2, text="Open Ports").grid(column=0, row=0, padx=30, pady=30)
+ttk.Label(tab3, text="Web Scanner").grid(column=0, row=0, padx=30, pady=30)
 
 # Add a read-only text box to tab1
 text_box1 = scrolledtext.ScrolledText(tab1)
@@ -48,6 +51,11 @@ text_box2 = scrolledtext.ScrolledText(tab2)
 text_box2.grid(column=0, row=1, padx=30, pady=30, sticky="nsew")
 text_box2.configure(state ='disabled') # Make it read-only
 
+# Add a read-only text box to tab3
+text_box3 = scrolledtext.ScrolledText(tab3)
+text_box3.grid(column=0, row=1, padx=30, pady=30, sticky="nsew")
+text_box3.configure(state ='disabled') # Make it read-only
+
 
 
 # Add a check button to tab1
@@ -58,11 +66,18 @@ enabled_checkbutton1.grid(column=1, row=1, padx=10, pady=10)
 enabled_check_scanner = tk.BooleanVar(value=True)
 enabled_checkbutton2 = ttk.Checkbutton(tab2, text="Enable", variable=enabled_check_scanner)
 enabled_checkbutton2.grid(column=1, row=1, padx=10, pady=10)
+# Add a check button to tab3
+enabled_check_web = tk.BooleanVar(value=True)
+enabled_checkbutton3 = ttk.Checkbutton(tab3, text="Enable", variable=enabled_check_web)
+enabled_checkbutton3.grid(column=1, row=1, padx=10, pady=10)
+
 # Configure the row containing the text boxes to expand with the window
 tab1.grid_rowconfigure(1, weight=1)
 tab1.grid_columnconfigure(0, weight=1)
 tab2.grid_rowconfigure(1, weight=1)
 tab2.grid_columnconfigure(0, weight=1)
+tab3.grid_rowconfigure(1, weight=1)
+tab3.grid_columnconfigure(0, weight=1)
 #configure colors
 text_box1.tag_config('red', foreground='red')
 text_box1.tag_config('green', foreground='green')
@@ -72,6 +87,13 @@ text_box2.tag_config('green', foreground='green')
 text_box2.tag_config('blue', foreground='blue')
 text_box2.tag_config('gold', foreground='gold2')
 text_box2.tag_config('RoyalBlue', foreground='RoyalBlue3')
+
+text_box3.tag_config('red', foreground='red')
+text_box3.tag_config('green', foreground='green')
+text_box3.tag_config('blue', foreground='blue')
+text_box3.tag_config('gold', foreground='gold2')
+text_box3.tag_config('RoyalBlue', foreground='RoyalBlue3')
+
 
 #Parse csv to make dictionnaries
 def csv_to_dictionary(file_path):
@@ -150,6 +172,40 @@ def PortScanner():
             text_box2.configure(state='disabled')
             text_box2.see('end')
             time.sleep(scan_sleep)
+def URLScanner():
+    #This is the dictionary that will be used to store the ips and ports that are scored
+    #scored={"
+    with open(web_file) as f:
+        urls = f.read().splitlines()
+        while True:
+            if enabled_check_web.get()==True:
+                #Show date
+                text_box3.configure(state='normal')
+                text_box3.insert('end',"Starting scan at "+str(datetime.datetime.now())+"\n")
+                text_box3.configure(state='disabled')
+                text_box3.see('end')
+                #Start Scan
+                nm=scanner.check_urls(urls)
+                i=0
+                for key in nm.keys():
+                    #check if the key is in the scored dictionary
+                    if key in urls:
+                        text_box3.configure(state='normal')
+                        text_box3.insert('end',key,'RoyalBlue')
+                        text_box3.insert('end',":")
+                        if nm[key]==True:
+                            text_box3.insert('end'," Up\n",'green')
+                        else:
+                            text_box3.insert('end'," Down\n",'red')
+                        text_box3.configure(state='disabled')
+                        text_box3.see('end')
+                        i=i+1
+                ##Sleep for 20 seconds
+                text_box3.configure(state='normal')
+                text_box3.insert('end',"Sleeping for "+str(scan_sleep)+" seconds\n")
+                text_box3.configure(state='disabled')
+                text_box3.see('end')
+                time.sleep(scan_sleep)
 
 # Start a new thread that updates the text boxes every 10 seconds
 
@@ -157,6 +213,7 @@ def PortScanner():
 #threading.Thread(target=PortScanner, daemon=True).start()
 pssh_thread=threading.Thread(target=pssh, daemon=True).start()
 PortScanner_thread=threading.Thread(target=PortScanner, daemon=True).start()
+URLScanner_thread=threading.Thread(target=URLScanner, daemon=True).start()
 # Start a new thread that updates the text boxes every 10 seconds
 
 root.mainloop()

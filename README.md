@@ -21,7 +21,13 @@ pip install -r requirements.txt
    127.0.0.1
    192.168.1.1
    ```
-3. Start the program:
+
+3. Create a `web_file.txt` file to set the target URLs to scan, which will continutly scanned for 200 responses. The format for this file should one URL per line:
+   ```
+   https://google.com/
+   https://bing.com/
+   ```
+4. Start the program:
    ```
    python3 main.py
    ```

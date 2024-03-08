@@ -1,4 +1,5 @@
 import nmap
+import requests
 
 def scan_ips(ip_addresses, ports):
     nm = nmap.PortScanner()
@@ -16,3 +17,18 @@ def scan_ips(ip_addresses, ports):
         if ip not in open_ports.keys():
             open_ports[ip]=["No open ports found."]
     return open_ports
+
+def check_urls(url_list):
+    url_dict = {}
+    for url in url_list:
+        try:
+            response = requests.get(url,timeout=10)
+            if response.status_code == 200:
+                url_dict[url] = True
+            else:
+                url_dict[url] = False
+        except requests.exceptions.RequestException as e:
+            url_dict[url] = False
+    print(url_dict)
+    return url_dict
+
